@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="afterimage-logo-white.png" alt="afterimage logo" width="320">
+  <img src="afterimage-logo-white.png" alt="afterimage logo" width="600">
 </p>
 
 <p align="center">
