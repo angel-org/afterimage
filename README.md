@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
- <b>An interactive web tool for generating typography posters and glitch art.</b>  
+<i><b>An interactive web tool for generating typography posters and glitch art.</b></i>    
 </p>
 
 ---
