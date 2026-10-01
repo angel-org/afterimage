@@ -1,14 +1,22 @@
-# afterimage
+<p align="center">
+  <img src="afterimage-logo.png" alt="afterimage logo" width="320">
+</p>
 
-An interactive web tool for generating typography posters and glitch art.
+<p align="center">
+  An interactive web tool for generating typography posters and glitch art.
+</p>
 
-## Features
-- **Poster Generator**: Turn any word into a visual poster.
+---
+
+### Features
+- **Poster Generator**: Turn any word into a visual glitch poster.
 - **Customization**: Presets, blur, glitch blocks, glow, and custom colors.
 - **Export**: Save your generated poster instantly.
 
-## Tech Stack
+### Tech Stack
 - HTML, CSS, JavaScript
 
-## License
-[MIT](LICENSE)
+---
+
+### License
+This project is licensed under the [MIT License](LICENSE).
