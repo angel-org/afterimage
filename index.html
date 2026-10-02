@@ -103,6 +103,12 @@ select,input[type=color]{font-size:16px;height:42px}
 .btn{padding:11px 16px}
 #hint{bottom:10px;left:10px}
 }
+.lnk{font:inherit;background:none;border:0;padding:0;color:var(--blue);text-decoration:underline;cursor:pointer}
+#sheet{position:fixed;inset:0;z-index:20;background:#05080bf2;display:grid;place-content:center;justify-items:center;gap:14px;padding:20px;color:#fff;text-align:center}
+#sheet[hidden]{display:none}
+#sheet img{max-width:100%;max-height:68dvh;border-radius:6px;-webkit-touch-callout:default;user-select:auto}
+#sheet p{margin:0;max-width:30em}
+#sheet button{font:inherit;padding:11px 22px;border-radius:99px;border:1px solid #fff;background:transparent;color:#fff;cursor:pointer}
 </style>
 </head>
 <body>
@@ -157,6 +163,7 @@ select,input[type=color]{font-size:16px;height:42px}
 <footer><button id="sv" class="go">Save poster</button><p id="msg"></p></footer>
 </aside>
 </div>
+<div id="sheet" hidden><img id="simg" alt="Your poster"><p>Press and hold the image, then choose Save to Photos (or Save image).</p><button id="sclose">Close</button></div>
 <script>
 const cv=document.getElementById('cv'),ctx=cv.getContext('2d'),$=id=>document.getElementById(id);
 const R=(a,b)=>a+Math.random()*(b-a);
@@ -266,14 +273,28 @@ $('mode').onclick=()=>{const t=isDark()?'light':'dark';root.dataset.theme=t;try{
 paintMode();
 
 new ResizeObserver(()=>{const r=$('stage').getBoundingClientRect();if($('poster').checked||(Math.abs(r.width-lw)<40&&Math.abs(r.height-lh)<60))fit();else build();}).observe($('stage'));
+let sheetUrl=null;
+function showSheet(blob){sheetUrl=URL.createObjectURL(blob);$('simg').src=sheetUrl;$('sheet').hidden=false;}
+$('sclose').onclick=()=>{$('sheet').hidden=true;if(sheetUrl)URL.revokeObjectURL(sheetUrl);};
 $('sv').onclick=async()=>{
   const m=$('msg');m.textContent='';
-  
+  const name=$('poster').checked?'afterimage-poster.png':'afterimage-screen.png';
   try{
     const blob=await new Promise(r=>cv.toBlob(r,'image/png'));
+    if(!blob)throw new Error('empty');
     const dl=await (window.claude&&claude.use?claude.use('downloads'):null);
-    if(dl){await dl.save({filename:$('poster').checked?'afterimage-poster.png':'afterimage-screen.png',data:blob});m.textContent='Saved.';}
-    else{m.textContent='Saving is not available in this view. Right-click the poster and choose Save image.';}
+    if(dl){await dl.save({filename:name,data:blob});m.textContent='Saved.';return;}
+    const file=new File([blob],name,{type:'image/png'});
+    if(matchMedia('(pointer:coarse)').matches&&navigator.canShare&&navigator.canShare({files:[file]})){
+      try{await navigator.share({files:[file],title:'afterimage'});m.textContent='';return;}
+      catch(e){if(e&&e.name==='AbortError')return;}
+    }
+    const ios=/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    if(ios){showSheet(blob);return;}
+    const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=name;document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),30000);
+    m.innerHTML='Saved to your downloads. <button class="lnk" id="alt">Did not work? Open the image</button>';
+    $('alt').onclick=()=>showSheet(blob);
   }catch(e){m.textContent=e&&e.code==='declined'?'Save cancelled.':'Could not save the poster.';}
 };
 (document.fonts&&document.fonts.load?document.fonts.load('300 100px Fraunces'):Promise.resolve()).catch(()=>{}).finally(applyPreset);
